@@ -1,0 +1,3 @@
+C:/Users/Paulc/Downloads/GIS/out/build/x64-Debug/CMakeFiles/GIS.dir
+C:/Users/Paulc/Downloads/GIS/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Paulc/Downloads/GIS/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

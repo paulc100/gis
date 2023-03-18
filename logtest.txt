@@ -1,0 +1,319 @@
+Course Project for COMP 8042
+Student Name: Paul Cavallo, Student Id: A01061713
+Begin of GIS Program log: 
+dbFile: database.txt
+logFile: logtest.txt
+scriptFile: script01.txt
+Start time: Fri Dec 09 23:40:35 2022
+
+; Script 1
+;
+; Testing using a small dataset
+;
+; Specify boundaries of coordinate space:
+;
+;world	0794530W	0792630W	381000N	383000N
+World boundaries are set to: 44.000000      -113.000000  -69.000000      30.000000
+;
+; Import the dataset [the address here is a relative address]
+Command 1: import	./VA_Monterey.txt
+
+Nothing imported - likely out of bounds
+
+------------------------------------------------------------------------------------------
+;
+; Lets visualize our already imported geographical data [this is an optional command]
+;debug	world
+;
+; Also lets see what is inside name and coordinate indices
+;debug	quad
+;debug	hash
+;
+; To fill out the cache, let's do a single-match location search
+Command 2: what_is_at	382812N	0793156W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+;
+; Now lets see if our cache is filled up
+;debug	pool
+;
+; A few more search queries
+Command 3: what_is	Church	VA
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; oops Church is "FEATURE_CLASS" how about the following query?
+Command 4: what_is	Central Church	VA
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 5: what_is	Town of Monterey	VA
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 6: what_is	Smith Field	VA
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; Let's try a wrong state abbreviation
+Command 7: what_is	Smith Field	CO
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+;
+; Lets check the buffer pool again
+;debug	pool
+;
+; So lets check the LRU mechanism [this query should move the last element of the cache all the way to the front!]
+Command 8: what_is_at	382812N	0793156W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+;
+; checking the buffer pool again
+;debug	pool
+;
+; More location searches
+Command 9: what_is_at	381816N	0793700W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 10: what_is_at	381816N	0793708W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 11: what_is_at	381612N	0793256W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 12: what_is_at	382951N	0793238W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; We expect two location matches for this one
+;
+Command 13: what_is_at	382856N	0793031W
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; Now performing some area search [this should return 7 features]
+;
+Command 14: what_is_in	382812N	0793156W	60	90
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; checking the buffer pool again
+; how about querying somewhere outside boundaries ?
+Command 15: what_is_in	382012N	0792330W	60	90
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; Let's try some variations of a single-match region search with a square region:
+Command 16: what_is_in	382148N	0793109W	15	15
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 17: what_is_in	-long	382148N	0793109W	15	15
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+; Let's try increasing the size of the region:
+Command 18: what_is_in	382148N	0793109W	60	60
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 19: what_is_in	382148N	0793109W	120	120
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 20: what_is_in	382148N	0793109W	180	180
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 21: what_is_in	-long	382148N	0793109W	180	180
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 22: what_is_in	-filter	structure	382600N	0793310W	120	120
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 23: what_is_in	-filter	water	382850N	0793030W	120	240
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+Command 24: what_is_in	-filter	pop	382000N	0793530W	3600	3600
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+;
+;debug	pool
+; Let's import a larger dataset [wait a second, VA_Bath has 520 records, why didn't all of them get imported? explain this in your report]
+Command 25: import	./VA_Bath.txt
+
+Nothing imported - likely out of bounds
+
+------------------------------------------------------------------------------------------
+; as import command bypasses the buffer pool, content of the buffer pool should remain intact
+;debug	pool
+;
+; Exiting
+;quit
+;
+; From this point on all of the commands will be ignored, you can use the following large dataset to test your implemented software
+; To consider this file please use the following world command at the beginning of this file
+; world	1130000W	0690000W	300000N	440000N
+Command 26: import	CO_All.txt
+
+Imported Features by name : 49332
+Longest probe sequence : 275
+Imported Locations : 49332
+Average name length : 53
+
+------------------------------------------------------------------------------------------
+;
+; And some searches; let's see if you're taking the state abbreviation into account:
+Command 27: what_is	Lincoln	CO
+
+183117|Lincoln|Populated Place|CO|08|Summit|117|392915N|1055908W|39.487487|-105.9855722|||||3120|10236|Boreas Pass|10/13/1978|
+
+------------------------------------------------------------------------------------------
+Command 28: what_is	Lincoln	NM
+
+Nothing Found
+
+------------------------------------------------------------------------------------------
+;
+; Let's try spanning the border:
+Command 29: what_is_in	365800N	1043030W	720	45
+
+194974|Rex Canyon|Valley|NM|35|Colfax|007|365918N|1043106W|36.9883567|-104.5183218|365951N|1043110W|36.9975|-104.5194444|2275|7464|Tin Pan Canyon|10/13/1978|03/11/2011
+194845|Morley|Locale|CO|08|Las Animas|071|370155N|1043017W|37.0319667|-104.5047099|||||2142|7027|Starkville|10/13/1978|
+194855|Morley Mine|Mine|CO|08|Las Animas|071|370158N|1043020W|37.0328001|-104.5055432|||||2138|7014|Starkville|10/13/1978|
+194847|Twentythree Canyon|Valley|CO|08|Las Animas|071|370303N|1043017W|37.0508551|-104.5047096|370334N|1042905W|37.059466|-104.4847089|2146|7041|Starkville|10/13/1978|
+194715|Starkville Number 1 Coal Mine|Mine|CO|08|Las Animas|071|370737N|1043104W|37.1269643|-104.517764|||||1986|6516|Trinidad West|10/13/1978|
+194853|Starkville Mines|Mine|CO|08|Las Animas|071|370727N|1043046W|37.1241867|-104.512764|||||1967|6453|Starkville|10/13/1978|
+194709|Stevens Mine|Mine|CO|08|Las Animas|071|370812N|1043057W|37.1366864|-104.5158194|||||1957|6421|Trinidad West|10/13/1978|
+194710|McLaughlin Mine|Mine|CO|08|Las Animas|071|370809N|1043107W|37.135853|-104.5185973|||||1963|6440|Trinidad West|10/13/1978|
+194711|Starkville Mine|Mine|CO|08|Las Animas|071|370803N|1043052W|37.1341864|-104.5144305|||||1965|6447|Trinidad West|10/13/1978|
+1735214|Santa Fe Pit|Mine|CO|08|Las Animas|071|370814N|1043059W|37.1372419|-104.5163749|||||1944|6378|Trinidad West|05/14/1997|
+194712|Henderson Mine|Mine|CO|08|Las Animas|071|370813N|1043011W|37.136964|-104.5030414|||||1965|6447|Trinidad West|10/13/1978|
+194713|Leone Mine|Mine|CO|08|Las Animas|071|370808N|1043011W|37.1355753|-104.5030414|||||1977|6486|Trinidad West|10/13/1978|
+194714|Moore Mine|Mine|CO|08|Las Animas|071|370802N|1043014W|37.1339086|-104.5038747|||||1991|6532|Trinidad West|10/13/1978|
+1735211|New Mary Mine|Mine|CO|08|Las Animas|071|370814N|1043019W|37.1372418|-104.5052636|||||1961|6434|Trinidad West|05/14/1997|
+194708|Trinidad Country Club|Locale|CO|08|Las Animas|071|370920N|1043056W|37.1555748|-104.5155413|||||1872|6142|Trinidad West|10/13/1978|
+199138|Fisher Peak Detention FPC-1 Dam|Dam|CO|08|Las Animas|071|370912N|1043008W|37.1533525|-104.5022078|||||1910|6266|Trinidad West|09/01/1994|
+199139|Fisher Peak Detention Reservoir FPC-1|Reservoir|CO|08|Las Animas|071|370912N|1043008W|37.1533525|-104.5022078|||||1910|6266|Trinidad West|09/01/1994|
+204072|KCRT-AM (Trinidad)|Tower|CO|08|Las Animas|071|370845N|1043044W|37.1458527|-104.5122081|||||1915|6283|Trinidad West|09/01/1994|
+204199|KCRT-FM (Trinidad)|Tower|CO|08|Las Animas|071|370845N|1043044W|37.1458527|-104.5122081|||||1915|6283|Trinidad West|09/01/1994|
+199140|Fisher Peak Detention FPC-2 Dam|Dam|CO|08|Las Animas|071|370924N|1043038W|37.1566859|-104.5105412|||||1871|6138|Trinidad West|09/01/1994|
+199141|Fisher Peak Detention Reservoir FPC-2|Reservoir|CO|08|Las Animas|071|370924N|1043038W|37.1566859|-104.5105412|||||1871|6138|Trinidad West|09/01/1994|
+2666868|Trinidad Fire Department Station 1|Building|CO|08|Las Animas|071|370925N|1043044W|37.1568076|-104.51211|||||1891|6204|Trinidad West|12/29/2011|
+194707|Columbian School|School|CO|08|Las Animas|071|370947N|1043031W|37.1630746|-104.5085966|||||1870|6135|Trinidad West|10/13/1978|
+2357336|Animas Street Gospel Hall|Church|CO|08|Las Animas|071|370958N|1043024W|37.1661111|-104.5066667|||||1852|6076|Trinidad West|10/23/2007|
+2357341|Temple Aaron|Church|CO|08|Las Animas|071|370958N|1043010W|37.1661111|-104.5027778|||||1866|6122|Trinidad West|10/23/2007|
+
+Number of items found: 
+25
+
+------------------------------------------------------------------------------------------
+;
+; Let's try a larger region and filter the results:
+Command 30: what_is_in	-filter	water	370000N	1040000W	600	600
+
+886629|Border Ditch|Canal|NM|35|Colfax|007|365944N|1040550W|36.9955789|-104.0971958|||||1838|6030|Trinchera Pass|11/13/1980|
+895826|Trinchera Creek|Stream|NM|35|Colfax|007|370000N|1040542W|37.0000233|-104.0949734|365532N|1041044W|36.9255797|-104.1788666|1825|5987|Trinchera Pass|11/13/1980|
+194952|Ojito Banadero|Spring|CO|08|Las Animas|071|370058N|1040942W|37.016134|-104.1616429|||||1873|6145|Abeyta|10/13/1978|
+194951|Quintanilla Ditch|Canal|CO|08|Las Animas|071|370223N|1040909W|37.0397445|-104.1524755|||||1825|5987|Abeyta|10/13/1978|
+203744|Border Ditch|Canal|CO|08|Las Animas|071|370047N|1040636W|37.0130786|-104.1099739|||||1839|6033|Trinchera|10/13/1978|
+194963|Hart Ditch|Canal|CO|08|Las Animas|071|370109N|1040450W|37.0191895|-104.0805281|||||1805|5922|Trinchera|10/13/1978|
+203745|Trinchera Company Ditch|Canal|CO|08|Las Animas|071|370048N|1040539W|37.0133563|-104.0941399|||||1817|5961|Trinchera|10/13/1978|
+194954|Cadilloso Arroyo|Stream|CO|08|Las Animas|071|370128N|1040605W|37.0244671|-104.1013623|365946N|1040947W|36.9961344|-104.1630321|1816|5958|Trinchera|10/13/1978|
+194955|Rito Azul|Stream|CO|08|Las Animas|071|370140N|1040418W|37.0278004|-104.0716387|365751N|1040947W|36.9641904|-104.1630323|1782|5846|Trinchera|10/13/1978|
+898418|Rito Azul|Stream|NM|35|Colfax|007|370140N|1040417W|37.0278004|-104.0713608|365750N|1040949W|36.9639126|-104.163588|1782|5846|Trinchera|11/13/1980|
+196374|Brown Spring|Spring|CO|08|Las Animas|071|365959N|1035333W|36.9997452|-103.8924643|||||2091|6860|Alps Mesa|10/13/1978|
+196271|Romero Spring|Spring|CO|08|Las Animas|071|370016N|1035944W|37.0044675|-103.9955243|||||1860|6102|Branson|10/13/1978|
+194959|Chaney Arroyo|Stream|CO|08|Las Animas|071|370511N|1040200W|37.0864103|-104.0333029|365631N|1035949W|36.941968|-103.996914|1718|5636|Trinchera|10/13/1978|
+194965|Salazar Arroyo|Stream|CO|08|Las Animas|071|370335N|1040247W|37.059715|-104.046364|365542N|1040109W|36.928213|-104.01907|1743|5718|Trinchera|10/13/1978|11/17/2010
+196273|Alkali Arroyo|Stream|CO|08|Las Animas|071|370323N|1035501W|37.0564109|-103.9169092|370039N|1035535W|37.0108333|-103.9263889|1791|5876|Branson|10/13/1978|
+194776|Surratt Spring|Spring|CO|08|Las Animas|071|370741N|1040119W|37.1280762|-104.021913|||||1708|5604|Purgatoire Canyon|10/13/1978|
+194957|Newcomb Ditch|Canal|CO|08|Las Animas|071|370627N|1040054W|37.107521|-104.0149684|||||1701|5581|Trinchera|10/13/1978|
+194958|Doss Arroyo|Stream|CO|08|Las Animas|071|370615N|1040051W|37.1041878|-104.0141351|370025N|1035628W|37.0069674|-103.9410776|1701|5581|Trinchera|10/13/1978|
+194775|Eastside Spring|Spring|CO|08|Las Animas|071|370951N|1040054W|37.1641865|-104.0149678|||||1663|5456|Purgatoire Canyon|10/13/1978|
+
+Number of items found: 
+19
+
+------------------------------------------------------------------------------------------
+Command 31: what_is_in	-filter	pop	370000N	1040000W	600	600
+
+204814|Trinchera|Populated Place|CO|08|Las Animas|071|370232N|1040251W|37.0422445|-104.0474707|||||1769|5804|Trinchera|10/13/1978|
+196276|Branson|Populated Place|CO|08|Las Animas|071|370103N|1035304W|37.0175227|-103.8844083|||||1911|6270|Branson|10/13/1978|03/21/2008
+
+Number of items found: 
+2
+
+------------------------------------------------------------------------------------------
+Command 32: what_is_in	-filter	structure	370000N	1040000W	600	600
+
+204275|Branson Heliport|Airport|CO|08|Las Animas|071|370109N|1035309W|37.0191893|-103.8857972|||||1911|6270|Branson|09/01/1994|
+2667283|Branson Fire Department|Building|CO|08|Las Animas|071|370058N|1035305W|37.0161978|-103.8845927|||||1916|6286|Branson|12/28/2011|
+
+Number of items found: 
+2
+
+------------------------------------------------------------------------------------------
+;
+; And some more or less random searches:
+Command 33: what_is	Slab Mill Gulch	CO
+
+186963|Slab Mill Gulch|Valley|CO|08|Gunnison|051|383616N|1070910W|38.6044375|-107.1528288|383724N|1071028W|38.6233333|-107.1744444|3025|9924|West Elk Peak SW|10/13/1978|
+
+------------------------------------------------------------------------------------------
+Command 34: what_is	Kemper School	CO
+
+179050|Kemper School|School|CO|08|Montezuma|083|372105N|1083437W|37.3513827|-108.5770373|||||1884|6181|Cortez|10/13/1978|
+
+------------------------------------------------------------------------------------------
+Command 35: what_is_at	380806N	1073426W
+
+188450|Courthouse Mountain|Summit|CO|08|Ouray|091|380806N|1073426W|38.1349928|-107.5739482|||||3695|12123|Courthouse Mountain|10/13/1978|
+
+------------------------------------------------------------------------------------------
+Command 36: what_is_at	371010N	1043002W
+
+204811|Trinidad|Populated Place|CO|08|Las Animas|071|371010N|1043002W|37.1694632|-104.5005407|||||1839|6033|Trinidad West|10/13/1978|03/21/2008
+2357344|First Christian Church|Church|CO|08|Las Animas|071|371008N|1043004W|37.1688889|-104.5011111|||||1842|6043|Trinidad West|10/23/2007|
+
+------------------------------------------------------------------------------------------
+Command 37: what_is_at	402906N	1064954W
+
+172749|Steamboat Springs|Populated Place|CO|08|Routt|107|402906N|1064954W|40.4849769|-106.8317158|||||2052|6732|Steamboat Springs|10/13/1978|03/21/2008
+
+------------------------------------------------------------------------------------------
+End time: Fri Dec 09 23:41:04 2022
+
